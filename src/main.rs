@@ -2,10 +2,11 @@
 extern crate regex;
 
 mod tokenizer;
+mod parser;
 
 fn main() {
     let code = "1 + 2\n3\t+  4";
-    let tokens = tokenizer::Tokenizer::new(&code);
+    let ast = parser::parse(&code);
 
-    tokens.for_each(|token| println!("{:?}", token));
+    println!("{:?}", ast);
 }

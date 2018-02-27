@@ -1,8 +1,10 @@
 use ::regex::{Regex, CaptureMatches};
 
-const EXPRESSIONS: [(&str, &str); 9] = [
+const KEYWORDS: [&str; 2] = ["let", "lambda"];
+const EXPRESSIONS: [(&str, &str); 10] = [
     ("identifier", r"[a-zA-Z_][a-zA-Z_0-9]*"),
     ("number", r"[0-9]+"),
+    ("string", r#""(?:[^"\\]*(?:\.[^"\\]*)*)""#),
     ("assignment", r"="),
     ("operator", r"[+\-*/%]"),
     ("whitespace", r"[ \t]+"),
@@ -21,14 +23,14 @@ pub struct Token<'t> {
     value: &'t str,
 }
 
-pub struct Tokenizer<'t> {
+pub struct Tokens<'t> {
     captures: CaptureMatches<'static, 't>,
     line_num: usize,
     line_start: usize,
 }
 
-impl<'t> Tokenizer<'t> {
-    pub fn new(code: &'t str) -> Self {
+impl<'t> Tokens<'t> {
+    pub fn tokenize(code: &'t str) -> Self {
         lazy_static! {
             static ref RE: Regex = {
                 let regexp = EXPRESSIONS.iter()
@@ -48,7 +50,7 @@ impl<'t> Tokenizer<'t> {
     }
 }
 
-impl<'t> Iterator for Tokenizer<'t> {
+impl<'t> Iterator for Tokens<'t> {
     type Item = Token<'t>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -77,6 +79,13 @@ impl<'t> Iterator for Tokenizer<'t> {
                                 self.line_num += 1;
                                 return self.next();
                             }
+
+                            "identifier" if KEYWORDS.contains(&value.as_str()) => {
+                                return Some(Token {line:   self.line_num,
+                                                   column: column,
+                                                   kind:   "keyword",
+                                                   value:  value.as_str()});
+                            },
 
                             _ => {
                                 return Some(Token {line:   self.line_num,
