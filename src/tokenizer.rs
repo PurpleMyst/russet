@@ -1,9 +1,13 @@
 use ::regex::{Regex, CaptureMatches};
 
-const EXPRESSIONS: [(&str, &str); 5] = [
+const EXPRESSIONS: [(&str, &str); 9] = [
+    ("identifier", r"[a-zA-Z_][a-zA-Z_0-9]*"),
     ("number", r"[0-9]+"),
+    ("assignment", r"="),
     ("operator", r"[+\-*/%]"),
     ("whitespace", r"[ \t]+"),
+    ("lparen", r"\("),
+    ("rparen", r"\)"),
     ("newline", r"\n"),
     ("unexpected", r".")
 ];
